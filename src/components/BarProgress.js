@@ -35,13 +35,24 @@ class BarProgress extends HTMLElement {
         position: relative;
 
         &::after {
+          --block: 10px;
+          --gap: 2px;
+          --step: calc(var(--block) + var(--gap));
+
           content: "";
           position: absolute;
           top: 1px;
           left: 1px;
           width: calc(var(--value) - 2px);
           height: calc(100% - 2px);
-          background-image: repeating-linear-gradient(to right, var(--fgcolor) 0 10px, transparent 10px 12px);
+          background:
+            repeating-linear-gradient(
+              to right,
+              var(--fgcolor) 0 var(--block),
+              transparent var(--block) var(--step)
+            );
+          background-repeat: no-repeat;
+          background-size: round(down, 100%, var(--step));
         }
       }
     `;
