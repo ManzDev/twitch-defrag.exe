@@ -162,13 +162,24 @@
         position: relative;
 
         &::after {
+          --block: 10px;
+          --gap: 2px;
+          --step: calc(var(--block) + var(--gap));
+
           content: "";
           position: absolute;
           top: 1px;
           left: 1px;
           width: calc(var(--value) - 2px);
           height: calc(100% - 2px);
-          background-image: repeating-linear-gradient(to right, var(--fgcolor) 0 10px, transparent 10px 12px);
+          background:
+            repeating-linear-gradient(
+              to right,
+              var(--fgcolor) 0 var(--block),
+              transparent var(--block) var(--step)
+            );
+          background-repeat: no-repeat;
+          background-size: round(down, 100%, var(--step));
         }
       }
     `}updateValue(s){this.shadowRoot.querySelector("p").textContent="Defragmenting file system...",this.style.setProperty("--value",`${s}%`),this.shadowRoot.querySelector(".value").textContent=s}connectedCallback(){this.value=this.getAttribute("value"),this.render()}render(){this.shadowRoot.innerHTML=`
@@ -177,7 +188,7 @@
       <p></p>
       <div class="bar"></div>
       <p><span class="value">0</span>% complete</p>
-    </div>`}}customElements.define("bar-progress",h);const x=1003,d=3,y=1250,E={0:"empty",1:"used",2:"full",3:"writing"},w=[0,0,0,0,0,0,1,1,2,2];class u extends HTMLElement{constructor(){super(),this.attachShadow({mode:"open"}),this.stage=0,this.group=0}static get styles(){return`
+    </div>`}}customElements.define("bar-progress",h);const x=1003,d=3,v=1250,E={0:"empty",1:"used",2:"full",3:"writing"},w=[0,0,0,0,0,0,1,1,2,2];class u extends HTMLElement{constructor(){super(),this.attachShadow({mode:"open"}),this.stage=0,this.group=0}static get styles(){return`
       :host {
         --bgcolor: #bfbfbf;
         --fgcolor: #00007f;
@@ -247,7 +258,7 @@
           }
         }
       }
-    `}connectedCallback(){this.render();const s=this.shadowRoot.querySelector("button");this.bar=this.shadowRoot.querySelector("bar-progress"),s.addEventListener("click",()=>this.startDefrag())}renderBlocks(){const s=[];for(let r=0;r<x;r++){const i=w[Math.floor(Math.random()*w.length)],t=E[i];s.push(`<disk-block ${t}></disk-block>`)}return s.join("")}async startDefrag(){this.stage=1,await this.defragFullBlocks(),await this.defragUsedBlocks()}async checkDefragBlocks(){return new Promise((s,r)=>{const i=[...this.shadowRoot.querySelectorAll("disk-block")],t=[...this.shadowRoot.querySelectorAll("disk-block[empty]")].length;let e=0;const n=o=>{if(this.stage===1)return i[o].isFull();if(this.stage===2)return i[o].isFull()||i[o].isUsed()};for(;n(e);)e++;for(let o=0;o<e;o++)i[o].setCompleted();const l=Math.ceil(e*100/(x-t));console.log({completedPercentage:l}),this.bar.setAttribute("value",l),s()})}async defragUsedBlocks(){if(this.stage===4||(await this.checkDefragBlocks(),await new Promise((r,i)=>{const t=[...this.shadowRoot.querySelectorAll("disk-block:not([completed])")],e=t.findLast(o=>o.isUsed()),n=t.find(o=>o.isEmpty()),l=t.filter(o=>o.isEmpty()).length===t.length;console.log({isSecondStageCompleted:l,stage:this.stage}),l&&(this.stage=4,r()),e&&n&&(e.setEmpty(),n.setUsed(),n.setCompleted()),r()}),this.stage===4))return;const s=this.group<d?250:Math.floor(Math.random()*(y/2));await this.markAsCompleted(s),await this.defragUsedBlocks()}async defragFullBlocks(){if(this.stage===4)return;await this.checkDefragBlocks(),await new Promise((r,i)=>{const t=[...this.shadowRoot.querySelectorAll("disk-block:not([completed])")],e=t.find(a=>a.isEmpty()),n=t.filter(a=>a.isFull()),l=Math.floor(Math.random()*n.length),o=n[l],g=n.filter(a=>!a.isCompleted()).length===0;console.log({isFirstStageCompleted:g,stage:this.stage}),g&&(this.stage=2,r()),o&&e&&(e.setWriting(),e.setFull(),o.setEmpty());const f=t.filter(a=>a.isEmpty()),v=Math.floor(Math.random()*f.length),m=f[v],b=t.find(a=>a.isUsed());m&&b&&(m.setUsed(),b.setEmpty()),r()});const s=this.group<d?250:Math.floor(Math.random()*y);await this.markAsCompleted(s),this.stage===1&&await this.defragFullBlocks(),this.stage===2&&await this.defragUsedBlocks()}async markAsCompleted(s){return new Promise((r,i)=>{this.group++,setTimeout(()=>{console.log(this.group),this.group>d&&this.group--,r()},s)})}render(){this.shadowRoot.innerHTML=`
+    `}connectedCallback(){this.render();const s=this.shadowRoot.querySelector("button");this.bar=this.shadowRoot.querySelector("bar-progress"),s.addEventListener("click",()=>this.startDefrag())}renderBlocks(){const s=[];for(let r=0;r<x;r++){const i=w[Math.floor(Math.random()*w.length)],t=E[i];s.push(`<disk-block ${t}></disk-block>`)}return s.join("")}async startDefrag(){this.stage=1,await this.defragFullBlocks(),await this.defragUsedBlocks()}async checkDefragBlocks(){return new Promise((s,r)=>{const i=[...this.shadowRoot.querySelectorAll("disk-block")],t=[...this.shadowRoot.querySelectorAll("disk-block[empty]")].length;let e=0;const n=o=>{if(this.stage===1)return i[o].isFull();if(this.stage===2)return i[o].isFull()||i[o].isUsed()};for(;n(e);)e++;for(let o=0;o<e;o++)i[o].setCompleted();const l=Math.ceil(e*100/(x-t));console.log({completedPercentage:l}),this.bar.setAttribute("value",l),s()})}async defragUsedBlocks(){if(this.stage===4||(await this.checkDefragBlocks(),await new Promise((r,i)=>{const t=[...this.shadowRoot.querySelectorAll("disk-block:not([completed])")],e=t.findLast(o=>o.isUsed()),n=t.find(o=>o.isEmpty()),l=t.filter(o=>o.isEmpty()).length===t.length;console.log({isSecondStageCompleted:l,stage:this.stage}),l&&(this.stage=4,r()),e&&n&&(e.setEmpty(),n.setUsed(),n.setCompleted()),r()}),this.stage===4))return;const s=this.group<d?250:Math.floor(Math.random()*(v/2));await this.markAsCompleted(s),await this.defragUsedBlocks()}async defragFullBlocks(){if(this.stage===4)return;await this.checkDefragBlocks(),await new Promise((r,i)=>{const t=[...this.shadowRoot.querySelectorAll("disk-block:not([completed])")],e=t.find(a=>a.isEmpty()),n=t.filter(a=>a.isFull()),l=Math.floor(Math.random()*n.length),o=n[l],g=n.filter(a=>!a.isCompleted()).length===0;console.log({isFirstStageCompleted:g,stage:this.stage}),g&&(this.stage=2,r()),o&&e&&(e.setWriting(),e.setFull(),o.setEmpty());const f=t.filter(a=>a.isEmpty()),y=Math.floor(Math.random()*f.length),m=f[y],b=t.find(a=>a.isUsed());m&&b&&(m.setUsed(),b.setEmpty()),r()});const s=this.group<d?250:Math.floor(Math.random()*v);await this.markAsCompleted(s),this.stage===1&&await this.defragFullBlocks(),this.stage===2&&await this.defragUsedBlocks()}async markAsCompleted(s){return new Promise((r,i)=>{this.group++,setTimeout(()=>{console.log(this.group),this.group>d&&this.group--,r()},s)})}render(){this.shadowRoot.innerHTML=`
     <style>${u.styles}</style>
     <div class="container">
       <title-bar icon="defrag">Defragmenting Drive C</title-bar>
